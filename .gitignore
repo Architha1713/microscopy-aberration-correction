@@ -1,0 +1,30 @@
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Large microscopy datasets
+dataset/
+
+# Trained model weights
+*.pth
+*.pt
+
+# Large microscopy files
+*.mrc
+*.tif
+*.tiff
+
+# Generated comparison images
+results/comparisons/
+
+# Secrets
+.env
+.env.*
+
+# IDE files
+.vscode/
