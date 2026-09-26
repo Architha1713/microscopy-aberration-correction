@@ -1,96 +1,202 @@
-# Microscopy AI — Neural Aberration Correction
+# Microscopy AI — Deep Learning-Based Aberration Correction
 
-A deep learning research project exploring **computational aberration correction for two-photon microscopy** using a physics-grounded synthetic degradation pipeline and a Residual U-Net.
+A deep learning project exploring neural network-based image restoration
+for microscopy, with a focus on correcting image degradation caused by
+optical aberrations.
 
-The project investigates whether optical aberrations and depth-related image degradation can be corrected computationally without requiring additional adaptive-optics hardware or per-image optimization.
+This project implements a U-Net-based deep learning pipeline for
+microscopy image restoration, including dataset preprocessing,
+degradation generation, model training, and quantitative evaluation.
 
-> **Research Status:** Research project / manuscript in preparation  
-> **Framework:** PyTorch  
-> **Architecture:** Residual U-Net  
-> **Domain:** Computational Microscopy · Deep Learning · Image Restoration · Computational Adaptive Optics
+The goal is to investigate how deep learning can improve the quality
+of degraded microscopy images and support computational adaptive optics.
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Research Motivation](#research-motivation)
+- [Key Features](#key-features)
+- [Project Workflow](#project-workflow)
+- [Model Architecture](#model-architecture)
+- [Dataset](#dataset)
+- [Repository Structure](#repository-structure)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Evaluation](#evaluation)
+- [Results](#results)
+- [Technologies Used](#technologies-used)
+- [Limitations](#limitations)
+- [Future Work](#future-work)
+- [Author](#author)
 
 ---
 
 ## Overview
 
-Two-photon microscopy is widely used for imaging biological structures at depth, but optical aberrations caused by refractive-index variations can blur fine structures and reduce image quality.
+Optical aberrations and image degradation can reduce the resolution,
+contrast, and structural clarity of microscopy images.
 
-Traditional adaptive optics can correct these distortions using specialized hardware such as deformable mirrors and wavefront sensors. This project explores a software-based alternative: learning to correct aberrations directly from degraded microscopy images.
+This project explores a computational approach to microscopy image
+restoration using deep learning.
 
-The core idea is to:
+A U-Net-based neural network is implemented to learn the mapping
+between degraded microscopy images and their corresponding
+ground-truth images.
 
-1. Start with clean microscopy images.
-2. Simulate physically motivated optical aberrations.
-3. Add depth-dependent scattering and sensor noise.
-4. Train a neural network to recover the original image.
-5. Evaluate restoration quality using PSNR and SSIM.
+The project combines image preprocessing, synthetic degradation,
+deep learning-based restoration, and quantitative evaluation into
+a unified experimental workflow.
 
-Unlike a generic blur-based restoration pipeline, the degradation process is based on **Zernike wavefront aberrations and Fourier-optics-derived point spread functions (PSFs)**.
-
----
+The repository is designed to support experimentation with
+microscopy image restoration and provide a foundation for further
+research in computational adaptive optics.
 
 ## Research Motivation
 
-Deep-tissue microscopy can suffer from increasingly severe image degradation as imaging depth increases.
+High-quality microscopy imaging is essential for observing fine
+biological structures.
 
-Hardware-based adaptive optics can address these distortions, but it introduces additional equipment, calibration requirements, and operational complexity.
+However, optical aberrations and degradation can introduce distortions
+that affect the quality and interpretability of acquired images.
 
-This project investigates a lighter-weight computational approach:
+Traditional correction techniques may require specialized hardware,
+calibration, or computationally intensive processing.
 
-> Can a neural network learn to correct physically simulated optical aberrations in a single forward pass, without paired real aberrated images or specialized adaptive-optics hardware?
+Deep learning offers an alternative approach by learning image
+restoration mappings directly from training data.
 
-The objective is **not to replace hardware adaptive optics**, but to investigate whether computational correction can provide a useful improvement for laboratories without access to specialized correction hardware.
+This project investigates the potential of neural network-based
+restoration to improve degraded microscopy images while preserving
+important structural details.
 
----
+## Key Features
 
-## Key Contributions
+- U-Net-based deep learning model for image restoration
+- Microscopy dataset preprocessing and preparation
+- Synthetic degradation generation for training experiments
+- Support for multiple microscopy image categories
+- Training and evaluation pipelines implemented in PyTorch
+- Quantitative image-quality evaluation
+- Visual comparison of degraded, restored, and ground-truth images
+- Training-loss visualization and evaluation figure generation
 
-### 1. Physics-Grounded Degradation Pipeline
+## Project Workflow
 
-Instead of applying a generic Gaussian blur, the project simulates optical degradation using:
+The project follows a modular image-restoration workflow.
 
-- Randomized Zernike aberration coefficients
-- Fourier-optics-based PSF generation
-- Depth-dependent scattering
-- Sensor noise
-- FFT-based image convolution
+1. Dataset Preparation
+   - Organize microscopy images and ground-truth data.
+   - Inspect and validate dataset structure.
+   - Prepare training, validation, and testing splits.
 
-The aberration strength, depth factor, and noise level are randomized across training samples to expose the model to a range of degradation conditions.
+2. Image Preprocessing
+   - Convert and prepare microscopy image files.
+   - Generate degraded image samples.
+   - Apply degradation and point spread function (PSF)-related
+     processing where configured.
 
----
+3. Model Training
+   - Train a U-Net-based neural network using PyTorch.
+   - Optimize the model using the implemented training pipeline.
+   - Track training loss and save model checkpoints.
 
-### 2. Residual U-Net
+4. Evaluation
+   - Evaluate the trained model on held-out microscopy images.
+   - Compare restored outputs with corresponding ground-truth images.
+   - Generate evaluation summaries and visual comparisons.
 
-The restoration network is based on a U-Net encoder-decoder architecture with skip connections.
+5. Result Visualization
+   - Generate training curves, loss plots, and image-quality
+     comparison figures.
 
-Instead of predicting the complete restored image directly, the network predicts a **residual correction** which is added to the degraded input.
+## Model Architecture
 
-Architecture highlights:
+The project uses a U-Net-based neural network for image restoration.
 
-- 4 encoder stages
-- 4 decoder stages
-- DoubleConv blocks
-- Batch normalization
-- Transposed convolutions
-- Skip connections
-- Bottleneck dropout
-- Residual output formulation
+U-Net is an encoder-decoder architecture with skip connections,
+allowing the network to combine contextual information with
+spatial details from the input image.
 
-The final model uses a base channel configuration of 32.
+In microscopy restoration, preserving fine structural information
+is particularly important.
 
----
+The model is implemented in PyTorch.
 
-### 3. Combined Restoration Loss
+Implementation:
+- `model/unet.py`
 
-The training objective combines three complementary components:
+Training components:
+- `training/train.py`
+- `training/dataset.py`
+- `training/losses.py`
 
-- **L1 loss** — reduces pixel-level reconstruction error
-- **SSIM loss** — encourages structural similarity
-- **Sobel edge loss** — helps preserve fine boundaries and structures
+The architecture and training configuration can be explored
+and modified for further experimentation.
 
-The final configuration uses:
+## Dataset
+
+The project uses microscopy image data organized into multiple
+categories, including:
+
+- Microtubules
+- F-actin
+- Centrosomes (CCPs)
+- Additional microscopy image categories
+
+The dataset includes ground-truth and degraded image data used
+for training and evaluation.
+
+### Dataset Availability
+
+The original microscopy datasets are not included in this GitHub
+repository because of their size.
+
+Users must obtain the required data separately and organize it
+according to the directory structure expected by the preprocessing,
+training, and evaluation scripts.
+
+Please ensure that you have the necessary permissions to access
+and use the dataset before conducting experiments.
+
+## Repository Structure
 
 ```text
-λ1 = 0.5
-λSSIM = 0.3
-λedge = 0.2
+Microscopy_AI_Project/
+│
+├── app/
+│   └── app.py
+│
+├── dataset/                  # Local microscopy datasets (not tracked)
+│
+├── evaluation/
+│   ├── evaluate.py
+│   └── generate_paper_figures.py
+│
+├── model/
+│   └── unet.py
+│
+├── preprocessing/
+│   ├── apply_degradation.py
+│   ├── cap_dataset.py
+│   ├── check_dataset.py
+│   ├── convert_and_merge.py
+│   ├── convert_mrc.py
+│   ├── generate_degraded_dataset.py
+│   ├── psf_generator.py
+│   ├── sample_bbbc.py
+│   └── split_dataset.py
+│
+├── results/                  # Selected figures and summaries
+│
+├── testing/
+│
+├── training/
+│   ├── dataset.py
+│   ├── losses.py
+│   └── train.py
+│
+├── test_setup.py
+├── .gitignore
+└── README.md
